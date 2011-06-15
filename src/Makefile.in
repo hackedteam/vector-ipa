@@ -15,7 +15,7 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.in 3557 2011-06-07 09:16:06Z alor $
+# $Id: Makefile.am 3557 2011-06-07 09:16:06Z alor $
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@

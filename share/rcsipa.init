@@ -1,0 +1,47 @@
+#!/sbin/runscript
+#
+# Copyright 2009 HT srl
+#
+
+depend() {
+   need localmount 
+   use net
+   after capture
+}
+
+checkconfig() {
+   if [ ! -e $IPA_CFG_FILE ] ; then
+      eerror "Cannot find the configuration file"
+      return 1
+   fi
+}
+
+start() {
+   ebegin "Starting RCS Redirector & Proxy daemon"
+   eindent
+      checkconfig || return 1
+      einfo "Starting the Sniffer(s)"
+         eindent
+         # sleep some time to let the dag driver load correctly
+         sleep 5
+         for iface in `grep sniffing_iface $IPA_CFG_FILE | grep -v channel | cut -f 2 -d \"`; do
+            einfo "Capturing on $iface"
+            /rcsipa/bin/RCSRedirect -w -a $IPA_CFG_FILE 
+            sleep 1
+            pidof RCSRedirect > /dev/null
+            eend $?
+         done
+         eoutdent
+   eoutdent
+}
+
+stop() {
+   ebegin "Stopping RCS Redirector & Proxy daemon"
+   eindent
+      einfo "Stopping the Sniffer(s)"
+      killall -9 RCSRedirect 2> /dev/null
+      eend $?
+   eoutdent
+}
+
+# vim:ts=4:expandtab

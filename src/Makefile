@@ -15,7 +15,7 @@
 
 
 
-# $Id: Makefile 3557 2011-06-07 09:16:06Z alor $
+# $Id: Makefile.am 3557 2011-06-07 09:16:06Z alor $
 
 
 pkgdatadir = $(datadir)/RCSRedirect
@@ -110,11 +110,11 @@ DIST_SOURCES = $(RCSRedirect_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /root/devel/RCSRedirect/missing --run aclocal-1.11
-AMTAR = ${SHELL} /root/devel/RCSRedirect/missing --run tar
-AUTOCONF = ${SHELL} /root/devel/RCSRedirect/missing --run autoconf
-AUTOHEADER = ${SHELL} /root/devel/RCSRedirect/missing --run autoheader
-AUTOMAKE = ${SHELL} /root/devel/RCSRedirect/missing --run automake-1.11
+ACLOCAL = ${SHELL} /root/devel/vector-ipa/missing --run aclocal-1.11
+AMTAR = ${SHELL} /root/devel/vector-ipa/missing --run tar
+AUTOCONF = ${SHELL} /root/devel/vector-ipa/missing --run autoconf
+AUTOHEADER = ${SHELL} /root/devel/vector-ipa/missing --run autoheader
+AUTOMAKE = ${SHELL} /root/devel/vector-ipa/missing --run automake-1.11
 AWK = gawk
 BUILD_CFLAGS = -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing -g -ggdb -Wmissing-prototypes -Wno-uninitialized -Werror -Wformat-security -Wsign-compare -Wall -I/usr/include/pcap   -I../../RCSStreamingMelter/include
 BUILD_LIBS = -lpcap -lresolv -lpthread  -nopie -lpcap -lnet -lssl -lcrypto
@@ -143,7 +143,7 @@ LIBOBJS =
 LIBS = -lpcap -lresolv -lpthread 
 LTLIBOBJS = 
 MAINT = 
-MAKEINFO = ${SHELL} /root/devel/RCSRedirect/missing --run makeinfo
+MAKEINFO = ${SHELL} /root/devel/vector-ipa/missing --run makeinfo
 MELTER_LIBS = -L../../RCSStreamingMelter/lib -lmelt -lstdc++ -L../../RCSStreamingMelter/deps/beaengine/lib -lBeaEngine_s -L../../RCSStreamingMelter/deps/asmjit/lib -lAsmJit -lboost_filesystem-mt -lboost_regex-mt -lboost_program_options-mt -lboost_system-mt
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
@@ -165,10 +165,10 @@ SSLINC =
 SSLLIB = -lssl -lcrypto
 STRIP = 
 VERSION = 2011.06.13
-abs_builddir = /root/devel/RCSRedirect/src
-abs_srcdir = /root/devel/RCSRedirect/src
-abs_top_builddir = /root/devel/RCSRedirect
-abs_top_srcdir = /root/devel/RCSRedirect
+abs_builddir = /root/devel/vector-ipa/src
+abs_srcdir = /root/devel/vector-ipa/src
+abs_top_builddir = /root/devel/vector-ipa
+abs_top_srcdir = /root/devel/vector-ipa
 ac_ct_CC = gcc
 am__include = include
 am__leading_dot = .
@@ -195,7 +195,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /root/devel/RCSRedirect/install-sh
+install_sh = ${SHELL} /root/devel/vector-ipa/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale

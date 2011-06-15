@@ -6,3 +6,10 @@
 Release
 Debug
 packets
+*.o
+*.tar.gz
+RCSRedirect
+*.cache
+.deps
+*.log
+*.pem
