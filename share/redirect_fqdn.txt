@@ -1,0 +1,8 @@
+################################################################################
+#
+# List of hostnames to be redirected to the Injection Proxy
+# Every request to those hosts will be redirected to the specified IP
+# You cannot use wildcard for performance reasons
+#
+################################################################################
+PROXY_IP = auto

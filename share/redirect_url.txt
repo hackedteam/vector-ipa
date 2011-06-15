@@ -1,0 +1,9 @@
+################################################################################
+#
+# List of files to be redirected to the Injection Proxy
+# To configure the IP address of the Inj-Proxy see the redirect_fqdn.txt file
+# You can use wildcards to match an url, but remember to keep the list short
+#
+################################################################################
+REDIRECT_PAGE = redirect.html
+mirror18 100 *.exe*

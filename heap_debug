@@ -1,0 +1,1 @@
+valgrind --tool=memcheck --log-file=valgrind --track-origins=yes --leak-check=yes --track-fds=yes --show-reachable=yes -v $*

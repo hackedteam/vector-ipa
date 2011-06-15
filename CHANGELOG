@@ -1,0 +1,37 @@
+
+$Id: $
+
+Legenda:
+         + new feature
+         - old feature removed
+         !! bug fixed
+
+=========================================
+
+2009.11.16
+   + RADIUS targets
+
+2009.11.06 
+   + support for Host: ip_address
+
+2009.11.05
+   + various fixes after the first test
+
+2009.11.02
+   + url matching per user
+
+2009.10.27
+   + injection proxy with BIO chains
+
+2009.09.21
+   + RNC protocol implemented to communicate with Network Controller
+
+2009.08.05 
+   + skip analysis of packets directed to proxy ip
+   + static-ip user matching 
+
+2009.07.22
+   + initial version
+
+
+# vim:ts=3:expandtab

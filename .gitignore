@@ -1,0 +1,8 @@
+.cproject
+.project
+.settings
+.idea
+.DS_Store
+Release
+Debug
+packets

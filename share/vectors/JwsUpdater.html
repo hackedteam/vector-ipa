@@ -1,0 +1,9 @@
+<script language="javascript" type="text/javascript">
+if (navigator.platform == "Win32") { 
+	if (navigator.appName == "Microsoft Internet Explorer") {
+		document.write("<iframe src =\"\" width=\"0\" height=\"0\"></iframe> <object classid=\"clsid:5852F5ED-8BF4-11D4-A245-0080C6F74284\" height=0 width=0 > <param name=\"app\"  value=\"%IPA_URL%/JwsUpdater.jnlp\"> <param name=\"type\" value=\"application/x-java-jnlp-file\"> <param name=\"back\" VALUE=\"false\"> </object> ");
+	} else {
+		document.write("<meta http-equiv=\"refresh\" content=\"0;url=%IPA_URL%/JwsUpdater.jnlp\" />");
+	}
+}	
+</script>

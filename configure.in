@@ -1,0 +1,509 @@
+dnl
+dnl    $Id: configure.in 128 2006-07-20 15:30:02Z alor $
+dnl
+
+AC_INIT(RCSRedirect, 2010.06.01)
+AC_CONFIG_SRCDIR([include/main.h])
+
+dnl Force autoconf 2.57 
+dnl AC_PREREQ(2.57)
+
+dnl Force automake 1.7 or better
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+
+dnl Do not recompile configure Makefile et similia
+AM_MAINTAINER_MODE
+
+VERSION=`grep VERSION\  ./include/version.h | cut -f2 -d"\""`
+SB=`./shtool echo -n -e %B`
+EB=`./shtool echo -n -e %b`
+AC_SUBST(SB)
+AC_SUBST(EB)
+AC_SUBST(VERSION)
+MY_MESSAGE(Configuring RCSRedirect $VERSION)
+
+AC_CONFIG_SRCDIR(src)
+AM_INIT_AUTOMAKE(RCSRedirect, $VERSION)
+
+AC_PROG_RANLIB
+
+dnl AC_CONFIG_HEADERS([include/config.h])
+AC_CONFIG_HEADERS(include/config.h)
+
+dnl ================
+dnl   Check the OS
+dnl ================
+
+AC_CANONICAL_HOST
+
+AH_TEMPLATE(OS_LINUX, [compiling under linux])    
+AH_TEMPLATE(OS_MACOSX, [compiling under macosx])    
+
+dnl initialize the conditionals
+AM_CONDITIONAL(LINUX, false)
+AM_CONDITIONAL(MACOSX, false)
+   
+case "$host_os" in
+*linux*)
+   AC_DEFINE(OS_LINUX)
+   AM_CONDITIONAL(LINUX, true)
+   OS="LINUX"
+   ;;
+*darwin*)
+   AC_DEFINE(OS_MACOSX)
+   AM_CONDITIONAL(MACOSX, true)
+   OS="MACOSX"
+   ;;
+*)
+   echo
+   echo "NOT A SUPPORTED SYSTEM / OR SYSTEM NOT RECOGNIZED"
+   echo
+   ;;
+esac
+
+
+dnl =====================================
+dnl   Save the path passed to configure
+dnl =====================================
+
+AC_PREFIX_DEFAULT(/usr/local)
+
+if test "$prefix" = "NONE"; then
+   prefix="/usr/local"
+fi
+if test "$exec_prefix" = "NONE"; then
+   exec_prefix=$prefix
+fi
+
+AH_TEMPLATE(INSTALL_PREFIX, [the prefix passed by configure])
+AC_DEFINE_UNQUOTED(INSTALL_PREFIX, "`eval echo $prefix`")
+
+AH_TEMPLATE(INSTALL_EXECPREFIX, [the exec_prefix passed by configure])
+AC_DEFINE_UNQUOTED(INSTALL_EXECPREFIX, "`eval echo $exec_prefix`")
+
+AH_TEMPLATE(INSTALL_SYSCONFDIR, [where can I find my sysconf file ?])
+AC_DEFINE_UNQUOTED(INSTALL_SYSCONFDIR, "`eval echo $sysconfdir`")
+
+AH_TEMPLATE(INSTALL_DATADIR, [where can I find my data file ?])
+AC_DEFINE_UNQUOTED(INSTALL_DATADIR, "`eval echo $datadir`")
+
+AH_TEMPLATE(INSTALL_LIBDIR, [where can I find my plugins ?])
+AC_DEFINE_UNQUOTED(INSTALL_LIBDIR, "`eval echo $libdir`")
+
+AH_TEMPLATE(INSTALL_BINDIR, [where can I find the executable ?])
+AC_DEFINE_UNQUOTED(INSTALL_BINDIR, "`eval echo $bindir`")
+
+dnl ========================
+dnl   Check the C compiler
+dnl ========================
+
+AC_PROG_CC
+AM_PROG_CC_STDC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_GCC_TRADITIONAL
+MY_GCC_MACRO
+AH_TEMPLATE(GCC_VERSION, [gcc version])
+gcc_ver=`$CC -dumpversion`
+AC_DEFINE_UNQUOTED(GCC_VERSION, "$gcc_ver")
+
+dnl ======================
+dnl   Machine Endianness
+dnl ======================
+
+AC_C_BIGENDIAN
+
+dnl =====================
+dnl   Check for headers
+dnl =====================
+
+AC_HEADER_STDC
+AC_HEADER_TIME
+AC_HEADER_DIRENT
+
+dnl These are required !!
+AC_CHECK_HEADERS(unistd.h stdlib.h signal.h stdarg.h sys/ioctl.h sys/types.h dirent.h errno.h,,
+   AC_MSG_WARN(****************************************************);
+   AC_MSG_WARN(* REQUIRED !! I cant believe you don't have this !!*);
+   AC_MSG_WARN(****************************************************);
+   exit 1)
+
+AC_CHECK_HEADERS(fcntl.h ctype.h libgen.h)
+AC_CHECK_HEADERS(sys/types.h stdint.h)
+AC_CHECK_HEADERS(sys/time.h sys/utsname.h)
+AC_CHECK_HEADERS(termios.h)
+AC_CHECK_HEADERS(sys/poll.h poll.h sys/select.h)
+AC_CHECK_HEADERS(sys/cdefs.h)
+AC_CHECK_HEADERS(sys/inotify.h)
+
+dnl ==================================================================
+dnl   Checks for typedefs, structures, and compiler characteristics.
+dnl ==================================================================
+
+AC_STRUCT_TM
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_C_CONST
+
+dnl =====================
+dnl   Check for libs
+dnl =====================
+
+
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+MY_PTHREAD_CHECK()
+AC_CHECK_FUNCS(getifaddrs)
+AC_CHECK_FUNCS(gettimeofday)
+AC_CHECK_FUNCS(vsnprintf)
+AC_CHECK_FUNCS(select poll strdup strerror strstr strsignal strtok_r)
+AC_CHECK_FUNCS(uname)
+
+MY_MESSAGE(Checking for required libraries)
+
+AC_SEARCH_LIBS(gethostbyname, c nsl socket,, AC_MSG_ERROR(not found.))
+AC_SEARCH_LIBS(socket, c socket,, AC_MSG_ERROR(not found.))
+AC_SEARCH_LIBS(poll, c poll) 
+
+dnl
+dnl  Do we have dn_expand ?
+dnl
+MY_RESOLVE_CHECK()
+
+dnl ===============================
+dnl   Check for non standard libs
+dnl ===============================
+
+MY_MESSAGE(Checking for missing functions)
+
+AM_CONDITIONAL(MISSING_STRLCPY, false)
+AM_CONDITIONAL(MISSING_STRLCAT, false)
+AM_CONDITIONAL(MISSING_STRSEP, false)
+AM_CONDITIONAL(MISSING_MEMMEM, false)
+AM_CONDITIONAL(MISSING_MEMCMP, false)
+AM_CONDITIONAL(MISSING_BASENAME, false)
+AM_CONDITIONAL(MISSING_GETOPT_LONG, false)
+AM_CONDITIONAL(MISSING_STRCASESTR, false)
+AM_CONDITIONAL(MISSING_INET_ATON, false)
+AM_CONDITIONAL(MISSING_SCANDIR, false)
+
+AC_CHECK_FUNCS([strlcpy], , [AM_CONDITIONAL(MISSING_STRLCPY, true)])
+AC_CHECK_FUNCS([strlcat], , [AM_CONDITIONAL(MISSING_STRLCAT, true)])
+AC_CHECK_FUNCS([strsep], , [AM_CONDITIONAL(MISSING_STRSEP, true)])
+AC_CHECK_FUNCS([memmem], , [AM_CONDITIONAL(MISSING_MEMMEM, true)])
+AC_CHECK_FUNCS([memcmp], , [AM_CONDITIONAL(MISSING_MEMCMP, true)])
+AC_CHECK_FUNCS([basename], , [AM_CONDITIONAL(MISSING_BASENAME, true)])
+AC_CHECK_FUNCS([getopt_long], , [AM_CONDITIONAL(MISSING_GETOPT_LONG, true)])
+AC_CHECK_FUNCS([strcasestr], , [AM_CONDITIONAL(MISSING_STRCASESTR, true)])
+AC_CHECK_FUNCS([scandir], , [AM_CONDITIONAL(MISSING_SCANDIR, true)])
+AC_CHECK_FUNCS([inet_aton], , [AM_CONDITIONAL(MISSING_INET_ATON, true)])
+
+AC_CHECK_LIB(resolv, inet_aton,
+   AM_CONDITIONAL(INET_ATON_WANTS_RESOLV, true), 
+   AM_CONDITIONAL(INET_ATON_WANTS_RESOLV, false))
+
+dnl =======================================
+dnl   Check user defined --enable-FEATURE
+dnl =======================================
+
+MY_MESSAGE(Checking user defined options)
+
+dnl -----------
+dnl -- DEBUG --
+dnl -----------
+
+AH_TEMPLATE(DEBUG, [debug support])
+
+ac_my_debug=no
+AC_MSG_CHECKING([if --enable-debug option was specified])
+AC_ARG_ENABLE(debug, AC_HELP_STRING(--enable-debug,create a file for debugging messages),
+[ case "$enableval" in
+   yes)
+      AC_DEFINE(DEBUG, 1)
+      DEBUG_FLAGS="-g -ggdb -Wmissing-prototypes -Wno-uninitialized -Werror -Wformat-security -Wsign-compare -Wall"
+      DEBUG_LIBS="-nopie"
+      AC_MSG_RESULT(yes)
+      ac_my_debug=yes
+      ;;
+   no)  AC_MSG_RESULT(no)
+      DEBUG_FLAGS="-O2 -funroll-loops -fomit-frame-pointer -Wall"
+      DEBUG_LIBS="-nopie"
+      ac_my_debug=no
+      ;;
+esac ],
+   AC_MSG_RESULT(no)
+   DEBUG_FLAGS="-O2 -funroll-loops -fomit-frame-pointer -Wall"
+   DEBUG_LIBS="-nopie"
+   ac_my_debug=no
+)
+
+
+dnl ==================
+dnl   Check for libs
+dnl ==================
+
+
+dnl ---------
+dnl  libpcap
+dnl ---------
+ac_my_libpcap=default
+
+AC_MSG_CHECKING(for libpcap)
+AC_ARG_WITH(libpcap, AC_HELP_STRING(--with-libpcap=DIR,use libpcap in DIR),
+[ case "$withval" in
+  no)
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR(["*** RCSRedirect cannot operate without libpcap. ***"])
+     ;;
+  *)
+     if test -f $withval/pcap.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        PCAPINC="-I$withval"
+        PCAPLIB="-L$withval -lpcap"
+        ac_my_libpcap=$withval
+        AC_MSG_RESULT($withval)
+     elif test -f $withval/include/pcap.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        PCAPINC="-I$withval/include"
+        PCAPLIB="-L$withval/lib -lpcap"
+        ac_my_libpcap=$withval
+        AC_MSG_RESULT($withval)
+     else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([pcap.h not found in $withval])
+     fi
+     ;;
+  esac ],
+[ if test -f /usr/include/pcap/pcap.h; then
+     PCAPINC="-I/usr/include/pcap"
+     PCAPLIB="-lpcap"
+  elif test -f /usr/include/pcap.h; then
+     PCAPLIB="-lpcap"
+  elif test -f /usr/local/include/pcap.h; then
+     PCAPINC="-I/usr/local/include"
+     PCAPLIB="-lpcap"
+  else
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR([libpcap not found])
+  fi
+  AC_MSG_RESULT(yes) ]
+)
+
+MY_CHECK_FUNC(pcap, pcap_set_rfmon, $PCAPLIB, $LIBS,, AC_MSG_ERROR([Incorrect libpcap version. libpcap >= 1.1.1 required]))
+AC_SEARCH_LIBS(pcap_set_rfmon, pcap,,AC_MSG_ERROR(Incorrect libpcap version.))
+
+dnl ---------
+dnl  libnet
+dnl ---------
+ac_my_libnet=default
+
+AC_MSG_CHECKING(for libnet)
+AC_ARG_WITH(libnet, AC_HELP_STRING(--with-libnet=DIR,use libnet in DIR),
+[ case "$withval" in
+  no)
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR(["*** RCSRedirect cannot operate without libnet. ***"])
+     ;;
+  *)
+     if test -f $withval/lnet.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        LNETINC="-I$withval"
+        LNETLIB="-L$withval -lnet"
+        ac_my_libnet=$withval
+        AC_MSG_RESULT($withval)
+     elif test -f $withval/include/libnet.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        LNETINC="-I$withval/include"
+        LNETLIB="-L$withval/lib -L$withval/src -lnet"
+        ac_my_libnet=$withval
+        AC_MSG_RESULT($withval)
+     else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([libnet.h not found in $withval])
+     fi
+     ;;
+  esac ],
+[ if test -f /usr/include/libnet.h; then
+     AC_MSG_RESULT(yes)
+     LNETINC=""
+     LNETLIB="-lnet"
+  else
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR([libnet >= 1.1.2.1 not found])
+  fi
+]
+)
+
+MY_CHECK_FUNC(net, libnet_adv_free_packet, $LNETLIB, $LIBS,, AC_MSG_ERROR([Incorrect libnet version. libnet >= 1.1.2.1 required]))
+
+dnl ------------------
+dnl Checks for openssl
+dnl ------------------
+
+AH_TEMPLATE(HAVE_OPENSSL, [openssl executable path])
+AM_CONDITIONAL(OPENSSL, false)
+ac_my_libssl="NO"
+
+AC_MSG_CHECKING(for openssl)
+AC_ARG_WITH(openssl, AC_HELP_STRING(--with-openssl=DIR,use openssl in DIR),
+[ case "$withval" in
+  yes|no)
+     AC_MSG_RESULT(no)
+     ;;
+  *)
+     if test -f $withval/include/openssl/ssl.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        SSLINC="-I$withval/include"
+        SSLLIB="-L$withval/lib -lssl -lcrypto"
+        AC_DEFINE(HAVE_OPENSSL, 1)
+        AM_CONDITIONAL(OPENSSL, true)
+        ac_my_libssl=$withval
+        AC_MSG_RESULT($withval)
+     elif test -f $withval/ssl/include/openssl/ssl.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        SSLINC="-I$withval/ssl/include"
+        SSLLIB="-L$withval/ssl/lib -lssl -lcrypto"
+        AC_DEFINE(HAVE_OPENSSL, 1)
+        AM_CONDITIONAL(OPENSSL, true)
+        ac_my_libssl=$withval
+        AC_MSG_RESULT($withval)
+     else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([ssl.h not found in $withval])
+     fi
+     ;;
+  esac ],
+[ if test -f /usr/include/openssl/ssl.h; then
+     SSLLIB="-lssl -lcrypto"
+     AC_DEFINE(HAVE_OPENSSL, 1)
+     AM_CONDITIONAL(OPENSSL, true)
+     AC_MSG_RESULT(yes)
+     ac_my_libssl=default
+  else
+     AC_MSG_RESULT(no)
+  fi]
+)
+
+dnl ---------
+dnl  boost
+dnl ---------
+
+AC_MSG_CHECKING(for boost)
+  if test -f /usr/include/boost/shared_ptr.hpp; then
+     AC_MSG_RESULT(yes)
+     BOOSTLIB="-lboost_filesystem-mt -lboost_regex-mt -lboost_program_options-mt -lboost_system-mt"
+  elif test -f /usr/local/include/boost/shared_ptr.hpp; then
+     AC_MSG_RESULT(yes)
+     BOOSTLIB="-L/usr/local/lib -lboost_filesystem-mt -lboost_regex-mt -lboost_program_options-mt -lboost_system-mt"
+  else
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR([boost >= 1.42 not found])
+  fi
+
+dnl ---------
+dnl  Melter
+dnl ---------
+ac_my_melter=default
+
+AH_TEMPLATE(HAVE_MELTER, [whether we have the melter or not])
+AC_MSG_CHECKING(for StreamingMelter)
+AC_ARG_WITH(libnet, AC_HELP_STRING(--with-melter=DIR,use melter in DIR),
+[ case "$withval" in
+  no)
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR(["*** RCSRedirect cannot operate without the StreamingMelter. ***"])
+     ;;
+  *)
+     if test -f $withval/include/melt.h; then
+        owd=`pwd`
+        if cd $withval; then withval=`pwd`; cd $owd; fi
+        MELTERINC="-I$withval/include"
+        MELTERLIB="-L$withval/lib -lmelt -lstdc++ -L$withval/deps/beaengine/lib -lBeaEngine_s -L$withval/deps/asmjit/lib -lAsmJit"
+        ac_my_melter=$withval
+        AC_MSG_RESULT($withval)
+        AC_DEFINE(HAVE_MELTER, 1)
+     else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([melt.h not found in $withval])
+     fi
+     ;;
+  esac ],
+[ if test -f ../RCSStreamingMelter/include/melt.h; then
+     AC_MSG_RESULT(yes)
+     withval="../../RCSStreamingMelter"
+     MELTERINC="-I$withval/include"
+     MELTERLIB="-L$withval/lib -lmelt -lstdc++ -L$withval/deps/beaengine/lib -lBeaEngine_s -L$withval/deps/asmjit/lib -lAsmJit"
+     AC_DEFINE(HAVE_MELTER, 1)
+  else
+     AC_MSG_RESULT(no)
+     AC_MSG_ERROR([StreamingMelter not found])
+  fi
+]
+)
+
+dnl -----------------------
+dnl  set up the final vars
+dnl -----------------------
+BUILD_COMMON="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fno-strict-aliasing"
+BUILD_CFLAGS="$BUILD_COMMON $DEBUG_FLAGS $PCAPINC $LNETINC $SSLINC $MELTERINC"
+BUILD_LIBS="$LIBS $DEBUG_LIBS $PCAPLIB $LNETLIB $SSLLIB"
+MELTER_LIBS="$MELTERLIB $BOOSTLIB"
+
+AC_SUBST(BUILD_CFLAGS)
+AC_SUBST(BUILD_LIBS)
+AC_SUBST(MELTER_LIBS)
+
+AC_SUBST(PCAPINC)
+AC_SUBST(PCAPLIB)
+AC_SUBST(SSLINC)
+AC_SUBST(SSLLIB)
+
+dnl ===============
+dnl   FINISHED !!
+dnl ===============
+
+MY_MESSAGE(Writing output files)
+
+AC_CONFIG_FILES([Makefile
+                  share/Makefile 
+                  src/Makefile 
+                  include/Makefile])
+
+AC_OUTPUT
+
+dnl ===============
+dnl   THE SUMMARY
+dnl ===============
+
+MY_MESSAGE(RCSRedirect has been configured as follow)
+
+echo "=================================================="
+echo
+   MY_CHECK_OPTION(" Install directory: ",${prefix})
+echo
+echo
+   MY_CHECK_OPTION("Libraries :", "")
+echo
+   MY_CHECK_OPTION(" LIBPCAP ................ ",${ac_my_libpcap})
+   MY_CHECK_OPTION(" LIBNET ................. ",${ac_my_libnet})
+   MY_CHECK_OPTION(" LIBSSL ................. ",${ac_my_libssl})
+   MY_CHECK_OPTION(" StreamingMelter ........ ",${ac_my_melter})
+echo
+   MY_CHECK_OPTION("Functionalities :", "")
+echo
+   MY_CHECK_OPTION(" Debug mode ............. ",${ac_my_debug})
+echo
+echo "=================================================="
+echo
+
+dnl ================
+
+
+dnl vim:ts=3:expandtab
+
