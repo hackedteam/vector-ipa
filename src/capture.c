@@ -47,6 +47,7 @@ int is_pcap_file(char *file, char *errbuf);
 
 int iface_is_wireless(char *iface);
 int iface_set_status(char *iface, u_char status);
+int iface_unset_monitor(char *iface);
 int iface_set_monitor(char *iface);
 int iface_set_channel(char *iface, int channel);
 
@@ -219,15 +220,39 @@ void capture_init(void)
 
 }
 
-
 void capture_close(void)
 {
+
+	/* if the interface is wireless, disable the monitor mode */
+  	if (iface_is_wireless(GBL_OPTIONS->Siface)) {
+    	DEBUG_MSG(D_INFO, "Disactivating monitor mode on [%s]...", GBL_OPTIONS->Siface);
+            
+		do {
+        	/* bring the interface DOWN */
+           	if (iface_set_status(GBL_OPTIONS->Siface, IFACE_DOWN) != ESUCCESS) {
+         		DEBUG_MSG(D_ERROR, "ERROR: Failed to bring [%s] DOWN", GBL_OPTIONS->Siface);
+       			break;
+          	}
+
+          	/* try to set the rfmon now */
+           	if (iface_unset_monitor(GBL_OPTIONS->Siface) < 0) {
+            	DEBUG_MSG(D_ERROR, "ERROR: Monitor mode failed [%s]", pcap_geterr(GBL_PCAP->pcap));
+              	/* don't break here, we need to restore the interface in UP state */
+          	}
+
+          	/* bring the interface UP */
+           	if (iface_set_status(GBL_OPTIONS->Siface, IFACE_UP) != ESUCCESS) {
+           		FATAL_ERROR("Failed to bring [%s] UP, cannot continue", GBL_OPTIONS->Siface);
+             	break;
+          	}
+     	} while (0);
+	}
+
    if (GBL_PCAP->pcap)
       pcap_close(GBL_PCAP->pcap);
 
    DEBUG_MSG(D_DEBUG, "ATEXIT: capture_closed");
 }
-
 
 void capture_start(void)
 {
@@ -395,6 +420,39 @@ int iface_set_status(char *iface, u_char status)
 #endif
 }
 
+/*
+ * Unset the interface in monitor mode
+ */
+int iface_unset_monitor(char *iface)
+{
+#ifdef OS_MACOSX
+   return -EFAILURE;
+#endif
+#ifdef OS_LINUX
+   struct iwreq wrq;
+   int sk;
+
+   if ((sk = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+      return -EFAILURE;
+
+   strncpy(wrq.ifr_name, iface, IFNAMSIZ);
+
+   /* magic number for monitor mode
+    *
+    * the values come from:
+    *  { "Auto", "Ad-Hoc", "Managed", "Master", "Repeater", "Secondary", "Monitor", "Unknown/bug" }
+    */
+   wrq.u.mode = 2;
+
+   if (ioctl(sk, SIOCSIWMODE, &wrq) < 0) {
+      close(sk);
+      return -EFAILURE;
+   }
+
+   close(sk);
+   return ESUCCESS;
+#endif
+}
 
 /*
  * set the interface in monitor mode
